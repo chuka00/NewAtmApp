@@ -19,10 +19,17 @@ namespace ATM.Logic
             _dbContext = atmDBConnect;
         }
 
-        public async Task Deposit(int id, decimal amount)
+        public async Task Deposit()
         {
             try
             {
+                // Prompt the user for the ID and amount to deposit
+                Console.Write("Enter user ID: ");
+                int id = int.Parse(Console.ReadLine());
+
+                Console.Write("Enter deposit amount: ");
+                decimal amount = decimal.Parse(Console.ReadLine());
+
                 SqlConnection sqlConn = await _dbContext.OpenConnection();
 
                 string getUserInfo = $"SELECT Users.balance,Users.userId FROM Users WHERE Id = @UserId";
@@ -114,8 +121,31 @@ namespace ATM.Logic
         }
 
 
+        public async Task InteractiveTransfer()
+        {
+            try
+            {
+                Console.Write("Enter sender ID: ");
+                int senderId = Convert.ToInt32(Console.ReadLine());
 
-        public async Task transfer(int sender, int receiver, decimal amount)
+                Console.Write("Enter receiver ID: ");
+                int receiverId = Convert.ToInt32(Console.ReadLine());
+
+                Console.Write("Enter amount: ");
+                decimal amount = Convert.ToDecimal(Console.ReadLine());
+
+                await Transfer(senderId, receiverId, amount);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+        }
+
+
+
+        public async Task Transfer(int sender, int receiver, decimal amount)
         {
             try
             {
@@ -271,24 +301,30 @@ namespace ATM.Logic
 
 
 
-        public async Task Withdraw(int id, decimal amount)
+        public async Task Withdraw()
         {
             try
             {
+                Console.WriteLine("Please enter user ID:");
+                int id = int.Parse(Console.ReadLine());
+
+                Console.WriteLine("Please enter amount to withdraw:");
+                decimal amount = decimal.Parse(Console.ReadLine());
+
                 SqlConnection sqlConn = await _dbContext.OpenConnection();
 
                 string getUserInfo = $"SELECT Users.balance,Users.userId FROM Users WHERE Id = @UserId";
                 SqlCommand command = new SqlCommand(getUserInfo, sqlConn);
                 command.Parameters.AddRange(new SqlParameter[]
                 {
-                new SqlParameter
-                {
-                    ParameterName = "@UserId",
-                    Value = id,
-                    SqlDbType = SqlDbType.Int,
-                    Direction = ParameterDirection.Input,
-                    Size = 50
-                }
+            new SqlParameter
+            {
+                ParameterName = "@UserId",
+                Value = id,
+                SqlDbType = SqlDbType.Int,
+                Direction = ParameterDirection.Input,
+                Size = 50
+            }
                 });
 
                 UserViewModel user = new UserViewModel();
@@ -303,13 +339,13 @@ namespace ATM.Logic
 
                 if (amount > user.balance)
                 {
-                    Console.WriteLine("Insucficient Balance");
+                    Console.WriteLine("Insufficient Balance");
                     Environment.Exit(0);
                 }
 
                 user.balance = user.balance - amount;
 
-                command.CommandText = $"UPDATE  Users SET balance = {user.balance}  WHERE Id = @UserId";
+                command.CommandText = $"UPDATE Users SET balance = {user.balance} WHERE Id = @UserId";
 
                 var result = command.ExecuteNonQuery();
 
@@ -318,11 +354,11 @@ namespace ATM.Logic
 
                     DateTime myDateTime = DateTime.Now;
                     string sqlFormat = myDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    string desc = $"Withdrew a sum of {amount} from your account, you current balance is {user.balance}";
+                    string desc = $"Withdrew a sum of {amount} from your account, your current balance is {user.balance}";
                     command.CommandText = $"INSERT INTO Transactions (userId,receiverId,transactionType,desctiption,amount,status,createdAt)" +
                          $" VALUES (@sendId,null,'Withdraw',@desc,@amount,1,@date)";
                     command.Parameters.AddRange(new SqlParameter[]
-               {
+                    {
                 new SqlParameter
                 {
                     ParameterName = "@sendId",
@@ -355,7 +391,7 @@ namespace ATM.Logic
 
                 }
 
-               });
+                    });
                     command.ExecuteNonQuery();
                     Console.WriteLine($"Withdrawal Successful");
                 }

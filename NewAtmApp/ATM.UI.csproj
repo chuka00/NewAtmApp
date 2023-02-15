@@ -11,4 +11,9 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ATM.DAL\ATM.DAL.csproj" />
+    <ProjectReference Include="..\ATM.Logic\ATM.Logic.csproj" />
+  </ItemGroup>
+
 </Project>

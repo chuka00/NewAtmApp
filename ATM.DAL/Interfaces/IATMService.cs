@@ -7,8 +7,9 @@ namespace ATM.DAL.Interfaces
 {
     public interface IATMService: IDisposable
     {
-        Task Deposit(int id, decimal amount);
-        Task transfer(int sender, int receiver, decimal amount);
-        Task Withdraw(int id, decimal amount);
+        Task Deposit();
+        Task InteractiveTransfer();
+        Task Transfer(int sender, int receiver, decimal amount);
+        Task Withdraw();
     }
 }
