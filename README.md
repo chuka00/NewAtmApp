@@ -22,3 +22,6 @@ This is a console application that simulates an ATM machine. It allows users to 
 4. Select the type of transaction you want to perform: withdrawal, transfer, or deposit.
 5 Follow the prompts to complete the transaction.
 
+
+It is important to note that this project is incomplete and requires more testing, updates and refactoring.
+All kinds of help is highly welcomed!
