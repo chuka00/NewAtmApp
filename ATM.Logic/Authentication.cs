@@ -1,26 +1,23 @@
-﻿using ATM.DAL.Model;
+﻿using ATM.DAL;
+using ATM.DAL.Model;
 using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Data.SqlClient;
 using System.Data;
-using System.Text;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
-using ATM.DAL;
 
 namespace ATM.Logic
 {
     public class Authentication
     {
         private readonly ATMDBContext _dbContext;
-        private bool _disposed;
+        private readonly bool _disposed;
 
         public Authentication(ATMDBContext atmDBConnect)
         {
             _dbContext = atmDBConnect;
         }
 
-        public async Task<UserViewModel> CheckCardNumber()
+        public async Task<UserViewModel> CheckCardNumber(string cardnumber)
         {
             UserViewModel user = new UserViewModel();
             try

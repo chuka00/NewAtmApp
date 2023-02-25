@@ -1,10 +1,10 @@
-﻿using System;
-using System.Data.SqlClient;
-using System.Data;
-using System.Threading.Tasks;
-using ATM.DAL;
+﻿using ATM.DAL;
 using ATM.DAL.Interfaces;
 using ATM.DAL.Model;
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace ATM.Logic
 {
@@ -18,6 +18,54 @@ namespace ATM.Logic
         {
             _dbContext = atmDBConnect;
         }
+
+        public async Task<UserViewModel> CheckCardNumber()
+        {
+            UserViewModel user = new UserViewModel();
+            try
+            {
+                SqlConnection sqlConn = await _dbContext.OpenConnection();
+
+                Console.WriteLine("Please enter your card number:");
+                string cardnumber = Console.ReadLine();
+
+                string getUserInfo = $"SELECT Users.name,Users.userId,Users.cardPin FROM Users WHERE cardNumber = @cardnumber";
+                await using SqlCommand command = new SqlCommand(getUserInfo, sqlConn);
+                command.Parameters.AddRange(new SqlParameter[]
+                {
+            new SqlParameter
+            {
+                ParameterName = "@cardnumber",
+                Value = cardnumber,
+                SqlDbType = SqlDbType.VarChar,
+                Direction = ParameterDirection.Input,
+                Size = 15
+            }
+                });
+
+                using (SqlDataReader dataReader = await command.ExecuteReaderAsync())
+                {
+                    while (dataReader.Read())
+                    {
+                        user.Name = dataReader["name"].ToString();
+                        user.UserId = (Guid)dataReader["userId"];
+                        user.cardPin = Convert.ToInt32(dataReader["cardPin"]);
+                    }
+                }
+
+                return user;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+
+            }
+            return user;
+        }
+
+
 
         public async Task Deposit()
         {
@@ -212,8 +260,8 @@ namespace ATM.Logic
 
                 // do transfer
 
-                senderObj.balance = senderObj.balance - amount;
-                receiverObj.balance = receiverObj.balance + amount;
+                senderObj.balance -= amount;
+                receiverObj.balance += amount;
 
                 //update sender
                 command.CommandText = $"UPDATE  Users SET balance = {senderObj.balance}  WHERE Id = @senderId";
@@ -408,6 +456,48 @@ namespace ATM.Logic
                 Console.WriteLine(ex.StackTrace);
             }
         }
+
+
+        public async Task CheckBalance(Guid id)
+        {
+            try
+            {
+                SqlConnection sqlConn = await _dbContext.OpenConnection();
+
+                string getUserInfo = $"SELECT Users.balance,Users.userId FROM Users WHERE userId = @UserId";
+                await using SqlCommand command = new SqlCommand(getUserInfo, sqlConn);
+                command.Parameters.AddRange(new SqlParameter[]
+                {
+                new SqlParameter
+                {
+                    ParameterName = "@UserId",
+                    Value = id,
+                    SqlDbType = SqlDbType.UniqueIdentifier,
+                    Direction = ParameterDirection.Input,
+                    Size = 50
+                }
+                });
+                UserViewModel user = new UserViewModel();
+                using (SqlDataReader dataReader = await command.ExecuteReaderAsync())
+                {
+                    while (dataReader.Read())
+                    {
+                        user.balance = (decimal)dataReader["balance"];
+                        user.UserId = (Guid)dataReader["userId"];
+                    }
+                }
+
+                Console.WriteLine($"Your Balance is ${user.balance}");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+
+            }
+        }
+
 
         protected virtual void Dispose(bool disposing)
         {
