@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ATM.Logic
 {
-    public class ATMOperations
+    public static class ATMOperations
     {
 
         public static async Task Run()
@@ -27,14 +27,14 @@ namespace ATM.Logic
                         if (user.Name != null)
                         {
 
-                        return2: Console.WriteLine($"\t \tHello {user.Name} \n \t Please Insert Card Pin: ");
+                            return2: Console.WriteLine($"\t \tHello {user.Name} \n \t Please Insert Card Pin: ");
                             int pinNumber;
                             bool cardpin = int.TryParse(Console.ReadLine(), out pinNumber);
 
                             if ((user.cardPin == pinNumber) && cardpin)
                             {
                                 Console.Clear();
-                            return3: PrintOperations();
+                                return3: PrintOperations();
                                 string option = Console.ReadLine();
                                 //decimal amount;
                                 switch (option)
