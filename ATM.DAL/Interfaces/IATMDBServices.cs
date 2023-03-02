@@ -6,10 +6,11 @@ namespace ATM.DAL.Interfaces
 {
     public interface IATMDBServices
     {
-        void createDB();
+        public void CreateDB();
 
-        void createUserTable();
+        public void CreateUserTable();
 
-        void insertUserDemoData();
+        public void InsertUserDemoData();
+        public void CreateTransactionTable();
     }
 }

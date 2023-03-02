@@ -19,37 +19,35 @@ namespace ATM.Logic
             _dbContext = atmDBConnect;
         }
 
-        public async Task<UserViewModel> CheckCardNumber()
+        public async Task<UserViewModel> CheckCardNumber(string cardNumber)
         {
             UserViewModel user = new UserViewModel();
             try
             {
                 SqlConnection sqlConn = await _dbContext.OpenConnection();
 
-                Console.WriteLine("Please enter your card number:");
-                string cardnumber = Console.ReadLine();
-
-                string getUserInfo = $"SELECT Users.name,Users.userId,Users.cardPin FROM Users WHERE cardNumber = @cardnumber";
+                string getUserInfo = $"SELECT Users.Name,Users.UserId,Users.CardPin FROM [User] WHERE CardNumber = @CardNumber";
                 await using SqlCommand command = new SqlCommand(getUserInfo, sqlConn);
                 command.Parameters.AddRange(new SqlParameter[]
                 {
-            new SqlParameter
-            {
-                ParameterName = "@cardnumber",
-                Value = cardnumber,
-                SqlDbType = SqlDbType.VarChar,
-                Direction = ParameterDirection.Input,
-                Size = 15
-            }
+                new SqlParameter
+                {
+                    ParameterName = "@CardNumber",
+                    Value = cardNumber,
+                    SqlDbType = SqlDbType.VarChar,
+                    Direction = ParameterDirection.Input,
+                    Size = 15
+                }
                 });
+
 
                 using (SqlDataReader dataReader = await command.ExecuteReaderAsync())
                 {
                     while (dataReader.Read())
                     {
-                        user.Name = dataReader["name"].ToString();
-                        user.UserId = (Guid)dataReader["userId"];
-                        user.cardPin = Convert.ToInt32(dataReader["cardPin"]);
+                        user.Name = dataReader["Name"].ToString();
+                        user.UserId = (Guid)dataReader["UserId"];
+                        user.cardPin = Convert.ToInt32(dataReader["CardPin"]);
                     }
                 }
 
@@ -67,6 +65,7 @@ namespace ATM.Logic
 
 
 
+
         public async Task Deposit()
         {
             try
@@ -80,7 +79,7 @@ namespace ATM.Logic
 
                 SqlConnection sqlConn = await _dbContext.OpenConnection();
 
-                string getUserInfo = $"SELECT Users.balance,Users.userId FROM Users WHERE Id = @UserId";
+                string getUserInfo = $"SELECT User.AccountBalance,User.UserId FROM [User] WHERE Id = @UserId";
                 await using SqlCommand command = new SqlCommand(getUserInfo, sqlConn);
                 command.Parameters.AddRange(new SqlParameter[]
                 {
@@ -98,13 +97,13 @@ namespace ATM.Logic
                 {
                     while (dataReader.Read())
                     {
-                        user.balance = (decimal)dataReader["balance"];
-                        user.UserId = (Guid)dataReader["userId"];
+                        user.balance = (decimal)dataReader["AccountBalance"];
+                        user.UserId = (Guid)dataReader["UserId"];
                     }
                 }
                 user.balance = user.balance + amount;
 
-                command.CommandText = $"UPDATE  Users SET balance = {user.balance}  WHERE Id = @UserId";
+                command.CommandText = $"UPDATE  [User] SET AccountBalance = {user.balance}  WHERE Id = @UserId";
 
                 var result = await command.ExecuteNonQueryAsync();
 
@@ -113,7 +112,7 @@ namespace ATM.Logic
                     DateTime myDateTime = DateTime.Now;
                     string sqlFormat = myDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
                     string desc = $"Deposited a sum of {amount} into your account, you current balance is {user.balance}";
-                    command.CommandText = $"INSERT INTO Transactions (userId,receiverId,transactionType,desctiption,amount,status,createdAt)" +
+                    command.CommandText = $"INSERT INTO Transactions (UserId,receiverId,transactionType,desctiption,amount,createdAt)" +
                          $" VALUES (@sendId,null,'Deposit',@desc,@amount,1,@date)";
                     command.Parameters.AddRange(new SqlParameter[]
                {

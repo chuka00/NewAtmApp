@@ -17,7 +17,7 @@ namespace ATM.DAL
 
         private SqlConnection _dbConnection = null;
 
-        public ATMDBContext() : this(@"Data Source=.;Initial Catalog=BzAtmApp;Integrated Security=True")
+        public ATMDBContext() : this(@"Data Source = (localdb)\MSSQLLocalDB; Initial Catalog=CkBank; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False")
         {
 
         }

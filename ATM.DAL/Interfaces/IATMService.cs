@@ -8,7 +8,7 @@ namespace ATM.DAL.Interfaces
 {
     public interface IATMService: IDisposable
     {
-        Task<UserViewModel> CheckCardNumber();
+        Task<UserViewModel> CheckCardNumber(string cardNumber);
         Task Deposit();
         Task InteractiveTransfer();
         Task Transfer(int sender, int receiver, decimal amount);

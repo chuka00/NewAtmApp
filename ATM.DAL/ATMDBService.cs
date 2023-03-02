@@ -11,12 +11,15 @@ namespace ATM.DAL
     {
         private SqlConnection connection;
         private bool _disposed;
-        public void createDB()
+
+        public void CreateDB()
         {
             String ConnectionString;
-            connection = new SqlConnection(@"Data Source=.;Initial Catalog=NewBzAtmApp;Integrated Security=True");
-
-            ConnectionString = "CREATE DATABASE NewBzAtmApp";
+            SqlConnection connection = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+            ConnectionString = @" IF NOT EXISTS(SELECT name FROM sys.databases WHERE name = 'CkBank')
+                             BEGIN
+                             CREATE DATABASE CkBank;
+                             END";
 
             SqlCommand myCommand = new SqlCommand(ConnectionString, connection);
             try
@@ -39,19 +42,20 @@ namespace ATM.DAL
 
         }
 
-        public void createUserTable()
+
+        public void CreateUserTable()
         {
-
-            connection = new SqlConnection(@"Data Source=.;Initial Catalog=NewBzAtmApp;Integrated Security=True");
-
-            string createQ = "CREATE TABLE Users( id INT UNIQUE IDENTITY(1,1) NOT NULL," +
-                    "userId uniqueidentifier NOT NULL  DEFAULT newid()," +
-                    "name VARCHAR(70) NOT NULL, " +
-                    "cardNumber VARCHAR(15) NOT NULL UNIQUE, " +
-                    "cardPin VARCHAR(4) NOT NULL, " +
-                    "balance DECIMAL(38,2) NOT NULL, " +
-                    "status BIT NOT NULL, " +
-                    "PRIMARY KEY(Id))";
+            SqlConnection connection = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CkBank;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+            string createQ = @"IF NOT EXISTS(SELECT * FROM sys.tables WHERE name='[User]')
+                BEGIN
+                    CREATE TABLE [User] (
+                        UserId INT PRIMARY KEY IDENTITY(1,1),
+                        Name NVARCHAR(50) NOT NULL,
+                        CardNumber NVARCHAR(16) NOT NULL,
+                        CardPin NVARCHAR(4) NOT NULL,
+                        AccountBalance DECIMAL(18, 2) NOT NULL
+                    )
+                END";
 
             SqlCommand myCommand = new SqlCommand(createQ, connection);
             try
@@ -72,20 +76,18 @@ namespace ATM.DAL
                 }
             }
 
-
-
-
         }
+        //CreateUserTable();
 
-        public void insertUserDemoData()
+        public void InsertUserDemoData()
         {
-            connection = new SqlConnection(@"Data Source=.;Initial Catalog=NewBzAtmApp;Integrated Security=True");
+            SqlConnection connection = new SqlConnection(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CkBank;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
 
             string insertQuery =
-               $"INSERT INTO USERS (Name, cardNumber, cardPin, balance,status)   " +
-               $" VALUES ('John Doe','12345678910','1234',200000.89,1), " +
-               $" ('Jane Doe', '10987654321','4321', 500000000.00,1), " +
-               $" ('Zuri Micheal', '1122334455', '4545', 800000.17,1)";
+               $"INSERT INTO [User] (Name, CardNumber, CardPin, AccountBalance)   " +
+               $" VALUES ('Dav Hart','33745649437456','1234',100000.89), " +
+               $" ('Rayn Jim', '33302833330287','5555', 500000000.00), " +
+               $" ('Pam Micheal', '49684709528753', '1000', 800000.17)";
 
 
 
@@ -110,6 +112,54 @@ namespace ATM.DAL
                 }
             }
 
+        }
+        //insertUserDemoData();
+        public void CreateTransactionTable()
+        {
+            SqlConnection connection = new SqlConnection(@"Data Source = (localdb)\MSSQLLocalDB; Initial Catalog=CkBank; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False");
+
+            string createQ = @"IF NOT EXISTS(SELECT * FROM sys.tables WHERE name='[Transaction]')
+                BEGIN
+                    CREATE TABLE [Transaction] (
+                        TransactionId INT PRIMARY KEY IDENTITY(1,1),
+                        UserId INT NOT NULL,
+                        Amount DECIMAL(18, 2) NOT NULL,
+                        Description NVARCHAR(100) NOT NULL,
+                        TransactionType NVARCHAR(10) NOT NULL,
+                        TransactionDate DATETIME NOT NULL,
+                        
+                        CONSTRAINT FK_Transaction_User FOREIGN KEY (UserId) REFERENCES [User](UserId)
+                    )END";
+
+            SqlCommand myCommand = new SqlCommand(createQ, connection);
+            try
+            {
+                connection.Open();
+                myCommand.ExecuteNonQuery();
+                Console.WriteLine("Transaction Table Created Successfully");
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+
+        }
+
+        public void BeginDbOperations()
+        {
+            CreateDB();
+
+            CreateUserTable();
+
+            InsertUserDemoData();
+            CreateTransactionTable();
         }
 
         protected virtual void Dispose(bool disposing)

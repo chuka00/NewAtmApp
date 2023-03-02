@@ -1,13 +1,15 @@
-﻿using ATM.Logic;
+﻿using ATM.DAL;
+using ATM.Logic;
 namespace NewAtmApp
 {
-    internal class Program
+    public class Program
     {
-        static async void Main(string[] args)
+        static  void Main (string[] args)
         {
-            // Console.WriteLine("Hello, World!");
-            //ATMOperations aTMOperations = new ATMOperations();
-            await ATMOperations.Run();
+            ATMOperations aTMOperations = new ATMOperations();
+            ATMDBService aTMDBService = new ATMDBService();
+            //aTMDBService.BeginDbOperations();
+            aTMOperations.Run();
         }
     }
 }

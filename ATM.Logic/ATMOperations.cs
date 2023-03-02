@@ -7,31 +7,37 @@ using System.Threading.Tasks;
 
 namespace ATM.Logic
 {
-    public static class ATMOperations
+    public class ATMOperations
     {
-
-        public static async Task Run()
+        ATMService ATMService = new ATMService(new ATMDBContext());
+        public async Task Run()
         {
+            ATMDBService aTMDBService = new ATMDBService();
+           // aTMDBService.BeginDbOperations();
+             
 
-            Console.WriteLine("Welcome To Bz ATM");
-          return1:  Console.WriteLine("\n Please Insert Your Card Number:  \n");
-            //string cardnumber = Console.ReadLine();
+            
+            
+
 
             using (IATMService aTMServices = new ATMService(new ATMDBContext()))
             {
-                 while (true)
-                {
+                // while (true)
+                
                     try
                     {
-                        var user = await aTMServices.CheckCardNumber();
+                        Console.WriteLine("Welcome To CkBank");
+                       return1: Console.WriteLine("\nPlease Insert Your Card Number:  \n");
+                        string cardNumber = Console.ReadLine();
+                        var user = await aTMServices.CheckCardNumber(cardNumber);
                         if (user.Name != null)
                         {
 
-                            return2: Console.WriteLine($"\t \tHello {user.Name} \n \t Please Insert Card Pin: ");
+                            return2: Console.WriteLine($"\t \tHello {user.Name} \n \t Please Insert CardPin: ");
                             int pinNumber;
-                            bool cardpin = int.TryParse(Console.ReadLine(), out pinNumber);
+                            bool cardPin = int.TryParse(Console.ReadLine(), out pinNumber);
 
-                            if ((user.cardPin == pinNumber) && cardpin)
+                            if ((user.cardPin == pinNumber) && cardPin)
                             {
                                 Console.Clear();
                                 return3: PrintOperations();
@@ -49,16 +55,7 @@ namespace ATM.Logic
                                         await aTMServices.CheckBalance(user.UserId);
                                         break;
                                     case "4":
-
-                                        Console.WriteLine("Enter Your Account ID:");
-                                        int senderId = int.Parse(Console.ReadLine());
-                                        Console.WriteLine("Enter Receiver's Account ID:");
-                                        int receiverId = int.Parse(Console.ReadLine());
-                                        Console.WriteLine("Enter Amount to Transfer:");
-                                        decimal amount = decimal.Parse(Console.ReadLine());
-
-                                        await aTMServices.Transfer(senderId, receiverId, amount);
-
+                                        await aTMServices.InteractiveTransfer();
                                         break;
                                     case "5":
                                         Console.WriteLine("Have a great day, goodbye!");
@@ -87,7 +84,7 @@ namespace ATM.Logic
                     {
                         Console.WriteLine(e.ToString());
                     }
-                }
+                //}
             }
         }
 
