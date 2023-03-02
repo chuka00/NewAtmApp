@@ -127,7 +127,6 @@ namespace ATM.DAL
                         Description NVARCHAR(100) NOT NULL,
                         TransactionType NVARCHAR(10) NOT NULL,
                         TransactionDate DATETIME NOT NULL,
-                        
                         CONSTRAINT FK_Transaction_User FOREIGN KEY (UserId) REFERENCES [User](UserId)
                     )END";
 

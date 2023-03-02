@@ -15,11 +15,6 @@ namespace ATM.Logic
             ATMDBService aTMDBService = new ATMDBService();
            // aTMDBService.BeginDbOperations();
              
-
-            
-            
-
-
             using (IATMService aTMServices = new ATMService(new ATMDBContext()))
             {
                 // while (true)
